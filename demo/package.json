@@ -1,6 +1,7 @@
 {
-  "name": "concepts",
+  "name": "demo",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "type": "module",
   "main": "index.js",
@@ -8,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Tomas Della Vedova",
+  "license": "Apache-2.0",
   "dependencies": {
     "desm": "^1.0.0",
     "fastify": "^3.8.0",
