@@ -1,14 +1,17 @@
 footer: [@delvedor](https://twitter.com/delvedor)
 slidenumbers: true
 
+[.slidenumbers: false]
 # [fit] Fastify 101
 
 ---
 
+![right 70%](images/elastic-logo-light.png)
+
 # Who am I?
 
 Tomas Della Vedova
-Senior Software Engineer @ [Elastic](https://www.elastic.co)
+Sr. Software Engineer @ [Elastic](https://www.elastic.co)
 
 - [fastify](https://github.com/fastify/fastify)
 - [fast-json-stringify](https://github.com/fastify/fast-json-stringify)
@@ -83,7 +86,7 @@ fastify.get('/', async (req, reply) => {
 
 // full declaration
 fastify.route({
-  method: 'GET',
+  method: 'POST',
   path: '/',
   handler: async (req, reply) => {
     return { hello: 'world' }
@@ -108,7 +111,7 @@ fastify.get('/', (req, reply) => {
 
 // full declaration
 fastify.route({
-  method: 'GET',
+  method: 'POST',
   path: '/',
   handler: (req, reply) => {
     reply.send({ hello: 'world' })
@@ -271,6 +274,7 @@ fastify.listen(3000, console.log)
 ▶ curl -H 'Accept-Version: 2.1.x' localhost:3000
 {"message":"Route GET:/ not found","error":"Not Found","statusCode":404}%
 
+
 ▶ curl localhost:3000
 {"message":"Route GET:/ not found","error":"Not Found","statusCode":404}%
 ```
@@ -301,6 +305,7 @@ tomas%
 ▶ curl localhost:3000/USER/tomas
 tomas%
 
+
 # with `caseSensitive: true` (default)
 ▶ curl localhost:3000/USER/tomas
 {"message":"Route GET:/USER/tomas not found","error":"Not Found","statusCode":404}%
@@ -315,14 +320,16 @@ tomas%
 
 ---
 
-[.code-highlight: 6-15]
+[.code-highlight: 8-17]
 
 ```js
 import Fastify from 'fastify'
 
 const fastify = Fastify()
 
-fastify.post('/hello', {
+fastify.route({
+  method: 'POST',
+  path: '/hello',
   schema: {
     body: {
       type: 'object',
@@ -332,11 +339,11 @@ fastify.post('/hello', {
       additionalProperties: false,
       required: ['name']
     }
+  },
+  handler: async (req, reply) => {
+    return { hello: req.body.name }
   }
-}, async (req, reply) => {
-  return { hello: req.body.name }
 })
-
 
 fastify.listen(3000, console.log)
 ```
@@ -362,7 +369,7 @@ fastify.listen(3000, console.log)
 
 ---
 
-[.code-highlight: 2, 7-11]
+[.code-highlight: 2, 9-13]
 
 ```js
 import Fastify from 'fastify'
@@ -370,14 +377,17 @@ import S from 'fluent-schema'
 
 const fastify = Fastify()
 
-fastify.post('/hello', {
+fastify.route({
+  method: 'POST',
+  path: '/hello',
   schema: {
     body: S.object()
       .additionalProperties(false)
       .prop('name', S.string().required())
+  },
+  handler: async (req, reply) => {
+    return { hello: req.body.name }
   }
-}, async (req, reply) => {
-  return { hello: req.body.name }
 })
 
 fastify.listen(3000, console.log)
@@ -573,6 +583,22 @@ fastify.listen(3000, console.log)
 
 ---
 
+```js
+// utils/repeat.js
+export default function repeat (str, times) {
+  return str.repeat(times)
+}
+
+// the rest of your application
+import repeat from './utils/repeat.js'
+import repeat from '../utils/repeat.js'
+import repeat from '../../utils/repeat.js'
+import repeat from '../../../utils/repeat.js'
+import repeat from '😱'
+```
+
+---
+
 [.code-highlight: 6, 12-13, 16-19]
 
 ```js
@@ -607,8 +633,10 @@ fastify.listen(3000, console.log)
 ▶ curl localhost:3000/repeat/choo
 choo%
 
+
 ▶ curl localhost:3000/repeat/choo?times=2
 choochoo%
+
 
 ▶ curl localhost:3000/repeat/choo?times=three
 {"statusCode":400,"error":"Bad Request","message":"querystring.times should be number"}
@@ -699,6 +727,23 @@ fastify.listen(3000, console.log)
 
 ---
 
+[.code-highlight: 2, 6-8]
+
+```js
+import Fastify from 'fastify'
+import MyPlugin from './my-plugins.js'
+
+const fastify = Fastify()
+
+fastify.register(MyPlugin)
+// but also
+fastify.register(import('./my-plugins.js'))
+
+fastify.listen(3000, console.log)
+```
+
+---
+
 ```js
 export default async function ThisIsAPlugin (fastify, options) {
 
@@ -760,19 +805,22 @@ export default async function ThisIsAPlugin (fastify, options) {
 
 ---
 
-[.code-highlight: 2, 6-8]
+[.code-highlight: 2]
 
 ```js
-import Fastify from 'fastify'
-import MyPlugin from './my-plugins.js'
+export default async function ThisIsAPlugin (fastify, options) {
+  fastify.register(import('./my-plugins.js'))
 
-const fastify = Fastify()
+  fastify.decorate('repeat', (str, times) => str.repeat(times))
 
-fastify.register(MyPlugin)
-// but also
-fastify.register(import('./my-plugins.js'))
+  fastify.addHook('onRequest', async (req, reply) => {
+    console.log('incoming request')
+  })
 
-fastify.listen(3000, console.log)
+  fastify.get('/', async (req, reply) => {
+    return { hello: 'world' }
+  })
+}
 ```
 
 ---
@@ -789,10 +837,12 @@ fastify.listen(3000, console.log)
 fastify.register(import('./plugin.js'))
 fastify.register(import('./other-plugin.js'))
 
+
 // plugin.js
 export default async function Repeat (fastify, options) {
   fastify.decorate('repeat', (str, times) => str.repeat(times))
 }
+
 
 // other-plugin.js
 export default async function Other (fastify, options) {
@@ -810,12 +860,13 @@ export default async function Other (fastify, options) {
 
 ---
 
-[.code-highlight: 6, 10, 14]
+[.code-highlight: 7, 11, 16]
 
 ```js
 // main.js
 fastify.register(import('./plugin.js'))
 fastify.register(import('./other-plugin.js'))
+
 
 // plugin.js
 import fp from 'fastify-plugin'
@@ -823,6 +874,7 @@ async function Repeat (fastify, options) {
   fastify.decorate('repeat', (str, times) => str.repeat(times))
 }
 export default fp(MyRoutes)
+
 
 // other-plugin.js
 export default async function Other (fastify, options) {
@@ -879,12 +931,15 @@ fastify.listen(3000)
 ```sh
 ▶ node index.js
 
+
 {"level":30,"time":1606910065312,"pid":16847,"hostname":"skadi.local",
   "msg":"Server listening at http://127.0.0.1:3000"}
+
 
 {"level":30,"time":1606910067203,"pid":16847,"hostname":"skadi.local",
   "reqId":1,"req":{"method":"GET","url":"/","hostname":"localhost:3000",
   "remoteAddress":"127.0.0.1","remotePort":63754},"msg":"incoming request"}
+
 
 {"level":30,"time":1606910067207,"pid":16847,"hostname":"skadi.local",
   "reqId":1,"res":{"statusCode":200},"responseTime":3.6735079288482666,
@@ -913,6 +968,15 @@ fastify.listen(3000)
 
 ---
 
+# Coming from Express?
+### [npm.im/fastify-express](http://npm.im/fastify-express)
+
+---
+
+![inline](images/fastify-express.png)
+
+---
+
 # A complete App
 
 ---
@@ -933,6 +997,8 @@ fastify.listen(3000)
 
 ---
 
+[.slidenumbers: false]
 [.hide-footer]
+
 # Thanks!
 ### [@delvedor](https://twitter.com/delvedor)
