@@ -1,4 +1,4 @@
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 export default async function hello (fastify, opts) {
   fastify.addHook('onRequest', fastify.authenticate)

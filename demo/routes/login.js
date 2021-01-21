@@ -1,4 +1,4 @@
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 export default async function login (fastify, opts) {
   const { httpErrors, jwt } = fastify
