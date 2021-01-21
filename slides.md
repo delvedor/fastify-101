@@ -373,7 +373,7 @@ fastify.listen(3000, console.log)
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 const fastify = Fastify()
 
@@ -445,7 +445,7 @@ console.log(stringify({
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 const fastify = Fastify()
 
@@ -475,7 +475,7 @@ fastify.listen(3000, console.log)
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 const fastify = Fastify()
 
@@ -603,7 +603,7 @@ import repeat from '😱'
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 const fastify = Fastify()
 
@@ -648,7 +648,7 @@ choochoo%
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 
 const fastify = Fastify()
 
@@ -678,7 +678,7 @@ fastify.listen(3000, console.log)
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 import authenticate from './my-auth-logic.js'
 
 const fastify = Fastify()
@@ -700,7 +700,7 @@ fastify.listen(3000, console.log)
 
 ```js
 import Fastify from 'fastify'
-import S from 'fluent-schema'
+import S from 'fluent-json-schema'
 import authenticate from './my-auth-logic.js'
 
 const fastify = Fastify()
@@ -873,7 +873,7 @@ import fp from 'fastify-plugin'
 async function Repeat (fastify, options) {
   fastify.decorate('repeat', (str, times) => str.repeat(times))
 }
-export default fp(MyRoutes)
+export default fp(Repeat)
 
 
 // other-plugin.js
