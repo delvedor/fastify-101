@@ -224,6 +224,56 @@ styles/login.css* Closing connection 0
 
 ---
 
+```js
+import Fastify from 'fastify'
+
+const fastify = Fastify()
+
+fastify.route({
+  method: 'GET',
+  path: '/',
+  handler: async (req, reply) => {
+    return { hello: 'world' }
+  }
+})
+
+fastify.route({
+  method: 'GET',
+  path: '/',
+  handler: async (req, reply) => {
+    return { ciao: 'mondo' }
+  }
+})
+
+fastify.listen(3000, console.log)
+```
+
+---
+
+[.code-highlight: 1]
+
+```
+AssertionError [ERR_ASSERTION]: Method 'GET' already declared for route '/'
+    at Router._insert (.../demo/node_modules/find-my-way/index.js:304:9)
+    at Router._on (.../demo/node_modules/find-my-way/index.js:197:8)
+    at Router.on (.../demo/node_modules/find-my-way/index.js:74:8)
+    at Object.afterRouteAdded (.../demo/node_modules/fastify/lib/route.js:228:16)
+    at .../demo/node_modules/fastify/lib/route.js:173:25
+    at Object._encapsulateThreeParam (.../demo/node_modules/avvio/boot.js:545:7)
+    at Boot.timeoutCall (.../demo/node_modules/avvio/boot.js:447:5)
+    at Boot.callWithCbOrNextTick (.../demo/node_modules/avvio/boot.js:428:19)
+    at Boot._after (.../demo/node_modules/avvio/boot.js:273:26)
+    at Plugin.exec (.../demo/node_modules/avvio/plugin.js:131:17) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '=='
+}
+```
+
+---
+
 [.code-highlight: 8, 10, 17, 19]
 
 ```js
@@ -234,7 +284,7 @@ const fastify = Fastify()
 fastify.route({
   method: 'GET',
   path: '/',
-  version: '1.0.0',
+  constraints: { version: '1.0.0' },
   handler: async (req, reply) => {
     return { hello: 'world' }
   }
@@ -243,7 +293,7 @@ fastify.route({
 fastify.route({
   method: 'GET',
   path: '/',
-  version: '2.0.0',
+  constraints: { version: '2.0.0' },
   handler: async (req, reply) => {
     return { ciao: 'mondo' }
   }
@@ -277,6 +327,39 @@ fastify.listen(3000, console.log)
 
 ▶ curl localhost:3000
 {"message":"Route GET:/ not found","error":"Not Found","statusCode":404}%
+```
+
+---
+
+[.code-highlight: 8, 17-20]
+
+```js
+import Fastify from 'fastify'
+
+const fastify = Fastify()
+
+fastify.route({
+  method: 'GET',
+  path: '/',
+  constraints: { host: 'auth.fastify.io' }
+  handler: async (req, reply) => {
+    return { hello: 'world' }
+  }
+})
+
+fastify.route({
+  method: 'GET',
+  path: '/',
+  constraints: {
+    version: '2.0.0',
+    host: 'auth.fastify.io'
+  },
+  handler: async (req, reply) => {
+    return { ciao: 'mondo' }
+  }
+})
+
+fastify.listen(3000, console.log)
 ```
 
 ---
@@ -436,7 +519,7 @@ const stringify = fastJson({
 console.log(stringify({
   firstName: 'Tomas',
   lastName: 'Della Vedova',
-  age: 27
+  age: 28
 }))
 ```
 ---
@@ -834,17 +917,17 @@ export default async function ThisIsAPlugin (fastify, options) {
 
 ```js
 // main.js
-fastify.register(import('./plugin.js'))
-fastify.register(import('./other-plugin.js'))
+fastify.register(import('./repeat.js'))
+fastify.register(import('./other.js'))
 
 
-// plugin.js
+// repeat.js
 export default async function Repeat (fastify, options) {
   fastify.decorate('repeat', (str, times) => str.repeat(times))
 }
 
 
-// other-plugin.js
+// other.js
 export default async function Other (fastify, options) {
   console.log(fastify.repeat) // undefined
 }
@@ -864,11 +947,11 @@ export default async function Other (fastify, options) {
 
 ```js
 // main.js
-fastify.register(import('./plugin.js'))
-fastify.register(import('./other-plugin.js'))
+fastify.register(import('./repeat.js'))
+fastify.register(import('./other.js'))
 
 
-// plugin.js
+// repeat.js
 import fp from 'fastify-plugin'
 async function Repeat (fastify, options) {
   fastify.decorate('repeat', (str, times) => str.repeat(times))
@@ -876,7 +959,7 @@ async function Repeat (fastify, options) {
 export default fp(Repeat)
 
 
-// other-plugin.js
+// other.js
 export default async function Other (fastify, options) {
   console.log(fastify.repeat) // Function
 }
@@ -975,9 +1058,9 @@ fastify.listen(3000)
 
 ![inline](images/fastify-express.png)
 
----
+<!-- ---
 
-# A complete App
+# A complete App -->
 
 ---
 
@@ -994,6 +1077,10 @@ fastify.listen(3000)
 ---
 
 # [fit] [github.com/delvedor/fastify-101](https://github.com/delvedor/fastify-101)
+
+# • • •
+
+# [fit] [github.com/delvedor/fastify-example](https://github.com/delvedor/fastify-example)
 
 ---
 
